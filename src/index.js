@@ -1,4 +1,5 @@
 import { minimalSetup, EditorView } from "codemirror";
+import { history } from "@codemirror/commands";
 import {
   dictMarkdownLanguage,
   dictMarkdownSyntaxHighlighting,
@@ -23,6 +24,7 @@ new EditorView({
     minimalSetup,
     dictMarkdownLanguage,
     dictMarkdownSyntaxHighlighting,
+    history(),
   ],
   parent: targetElement,
 });
