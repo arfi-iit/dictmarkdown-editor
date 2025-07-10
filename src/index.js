@@ -25,6 +25,7 @@ new EditorView({
     dictMarkdownLanguage,
     dictMarkdownSyntaxHighlighting,
     history(),
+    EditorView.lineWrapping,
   ],
   parent: targetElement,
 });
