@@ -1,10 +1,9 @@
 import { minimalSetup, EditorView } from "codemirror";
 import { history } from "@codemirror/commands";
-import {
-  dictMarkdownLanguage,
-  dictMarkdownSyntaxHighlighting,
-} from "./lang-dictmarkdown";
+import { dictMarkdownLanguage } from "./lang-dictmarkdown";
+import { dictMarkdownSyntaxHighlighting } from "./lang-dictmarkdown";
 import { operationsPanel } from "./editor-panel";
+
 
 const initialText = `**Z** s. m. invar. A treizeci şi una^1^, respectiv ultima_2_ literă a
 alfabetului limbii române, şi sunetul corespunzător (consoană
@@ -17,9 +16,9 @@ până la „zed“.* @VINEA, L. I, 137, cf. DL, DM, DER.@ *A fost dezolat
 capăt la altul. @Cf. DEX.@
 - Pronunţat: *ze* şi (în expresii) *zet*, (ieşit din uz) *zed.*
 `;
-const targetElement = document.querySelector("#editor");
 
-const editor = new EditorView({
+const targetElement:any = document.querySelector("#editor");
+new EditorView({
   doc: initialText,
   extensions: [
     minimalSetup,
@@ -29,5 +28,5 @@ const editor = new EditorView({
     operationsPanel(),
     EditorView.lineWrapping,
   ],
-  parent: targetElement,
+  parent: targetElement
 });

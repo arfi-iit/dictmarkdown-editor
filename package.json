@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "rollup -c",
-    "watch": "rollup -c -w",
+    "build": "tsc && rollup -c",
+    "watch": "tsc --watch & rollup -c -w",
     "start": "serve public",
     "dev": "npm-run-all --parallel start watch",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -27,8 +27,13 @@
     "@rollup/plugin-buble": "^1.0.3",
     "@rollup/plugin-commonjs": "^28.0.2",
     "@rollup/plugin-node-resolve": "^16.0.0",
+    "@rollup/plugin-typescript": "^12.1.4",
+    "@types/codemirror": "^5.60.16",
+    "@types/node": "^24.0.13",
     "npm-run-all": "^4.1.5",
     "rollup": "^4.34.7",
-    "serve": "^14.2.4"
+    "serve": "^14.2.4",
+    "tslib": "^2.8.1",
+    "typescript": "^5.8.3"
   }
 }
