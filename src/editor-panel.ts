@@ -2,8 +2,13 @@ import { showPanel } from "@codemirror/view";
 import { EditorView } from "@codemirror/view";
 import { Panel } from "@codemirror/view";
 
+type PanelButtonOptions = {
+	tag?: string;
+	iconClassName?: string;
+	action?: (view: EditorView) => void;
+};
 
-function createPanelButton(options: any, view: EditorView): Node {
+function createPanelButton(options: PanelButtonOptions, view: EditorView): Node {
 	let button = document.createElement(options.tag ?? "a");
 	let icon = document.createElement("i");
 	icon.className = options.iconClassName ?? "";
@@ -32,6 +37,7 @@ function makeBold(view: EditorView) {
 		},
 	});
 }
+
 function editorPanel(view: EditorView): Panel {
 	let dom = document.createElement("div");
 
