@@ -7,7 +7,7 @@ import { TransactionSpec } from "@codemirror/state";
 import { ViewUpdate } from "@codemirror/view";
 import { showPanel } from "@codemirror/view";
 import { syntaxTree } from "@codemirror/language";
-import {tags as t } from "@lezer/highlight";
+import { tags as t } from "@lezer/highlight";
 import { Tag } from "@lezer/highlight";
 
 type PanelButtonOptions = {
@@ -17,19 +17,27 @@ type PanelButtonOptions = {
   action?: (view: EditorView) => void;
 };
 
-interface AnnotationType{
+interface AnnotationType {
   name: string;
   node: Tag;
   markup: string;
 }
 
 class AnnotationTypes {
-  static readonly Bold: AnnotationType = {name: "Bold", node: t.strong, markup: "**"};
-  static readonly Italic: AnnotationType = {name: "Italic", node: t.emphasis, markup: "*"};
-  static readonly Reference: AnnotationType = {name: "Ref", node: t.link, markup: "@"};
-  static readonly Spaced: AnnotationType = {name: "Spaced", node: t.monospace, markup: "$"};
-  static readonly Subscript: AnnotationType = {name: "Subscript", node: t.compareOperator, markup: "_"};
-  static readonly Superscript: AnnotationType = {name: "Superscript", node: t.arithmeticOperator, markup: "^"};
+  static readonly Bold: AnnotationType = { name: "Bold", node: t.strong, markup: "**" };
+  static readonly Italic: AnnotationType = { name: "Italic", node: t.emphasis, markup: "*" };
+  static readonly Reference: AnnotationType = { name: "Ref", node: t.link, markup: "@" };
+  static readonly Spaced: AnnotationType = { name: "Spaced", node: t.monospace, markup: "$" };
+  static readonly Subscript: AnnotationType = { name: "Subscript", node: t.compareOperator, markup: "_" };
+  static readonly Superscript: AnnotationType = { name: "Superscript", node: t.arithmeticOperator, markup: "^" };
+  static readonly All = [
+    AnnotationTypes.Bold,
+    AnnotationTypes.Italic,
+    AnnotationTypes.Reference,
+    AnnotationTypes.Spaced,
+    AnnotationTypes.Subscript,
+    AnnotationTypes.Superscript
+  ];
 }
 
 class CssClasses {
@@ -63,27 +71,47 @@ function createPanelButton(
   return button;
 }
 
-function makeAnnotation(view: EditorView, mark: string): void {
+function toggleAnnotation(view: EditorView, mark: string): void {
   const { state } = view;
   const { from, to } = state.selection.main;
-  if (from == to) {
+  if (from < to) {
+    view.dispatch({
+      changes: {
+        from,
+        to,
+        insert: `${mark}${state.sliceDoc(from, to)}${mark}`,
+      },
+    });
     return;
   }
+  const node = getSyntaxNodeAtCursor(view);
+  if (node == null) {
+    return;
+  }
+  var annotationType = AnnotationTypes.All.find(at => at.name == node.type.name);
+  if (annotationType == null || annotationType.markup != mark) {
+    return;
+  }
+
+  const text = state.sliceDoc(node.from, node.to);
+  const replacement = text.replace(mark, '')
+    .replace(mark, '');
+
   view.dispatch({
     changes: {
-      from,
-      to,
-      insert: `${mark}${state.sliceDoc(from, to)}${mark}`,
-    },
+      from: node.from,
+      to: node.to,
+      insert: replacement
+    }
   });
 }
 
-const makeBold = (view: EditorView): void => makeAnnotation(view, AnnotationTypes.Bold.markup);
-const makeItalic = (view: EditorView): void => makeAnnotation(view, AnnotationTypes.Italic.markup);
-const makeSuperscript = (view: EditorView): void => makeAnnotation(view, AnnotationTypes.Superscript.markup);
-const makeSubscript = (view: EditorView): void => makeAnnotation(view, AnnotationTypes.Subscript.markup);
-const makeSpaced = (view: EditorView): void => makeAnnotation(view, AnnotationTypes.Spaced.markup);
-const makeRef = (view: EditorView): void => makeAnnotation(view, AnnotationTypes.Reference.markup);
+const makeBold = (view: EditorView): void => toggleAnnotation(view, AnnotationTypes.Bold.markup);
+const makeItalic = (view: EditorView): void => toggleAnnotation(view, AnnotationTypes.Italic.markup);
+const makeSuperscript = (view: EditorView): void => toggleAnnotation(view, AnnotationTypes.Superscript.markup);
+const makeSubscript = (view: EditorView): void => toggleAnnotation(view, AnnotationTypes.Subscript.markup);
+const makeSpaced = (view: EditorView): void => toggleAnnotation(view, AnnotationTypes.Spaced.markup);
+const makeRef = (view: EditorView): void => toggleAnnotation(view, AnnotationTypes.Reference.markup);
 
 
 function editorPanel(view: EditorView): Panel {
@@ -132,17 +160,16 @@ function editorPanel(view: EditorView): Panel {
   };
 }
 
-function hanleEditorUpdate(update:ViewUpdate){
+function hanleEditorUpdate(update: ViewUpdate) {
   if (update.docChanged || update.selectionSet || update.focusChanged || update.viewportChanged) {
     const node = getSyntaxNodeAtCursor(update.view);
-
     const buttons = document.getElementsByClassName(CssClasses.FormatButton);
     for (const button of buttons) {
       const { annotationTypeName } = (button as HTMLElement).dataset;
       if (node?.type.name == annotationTypeName) {
-	button.classList.add(CssClasses.ActiveButton);
-      }else{
-	button.classList.remove(CssClasses.ActiveButton);
+        button.classList.add(CssClasses.ActiveButton);
+      } else {
+        button.classList.remove(CssClasses.ActiveButton);
       }
     }
   }
