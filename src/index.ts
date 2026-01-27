@@ -4,6 +4,7 @@ import { dictMarkdownLanguage } from "./lang-dictmarkdown";
 import { dictMarkdownSyntaxHighlighting } from "./lang-dictmarkdown";
 import { operationsPanel } from "./editor-panel";
 import { formattingUpdateListener } from "./editor-panel";
+import { editorPanelKeymap } from "./editor-panel";
 
 const initialText = `**Z** s. m. invar. A treizeci şi una^1^, respectiv ultima_2_ literă a
 alfabetului limbii române, şi sunetul corespunzător (consoană
@@ -27,7 +28,8 @@ new EditorView({
     history(),
     operationsPanel(),
     EditorView.lineWrapping,
-    formattingUpdateListener
+    formattingUpdateListener,
+    editorPanelKeymap
   ],
   parent: targetElement
 });

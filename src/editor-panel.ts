@@ -1,14 +1,13 @@
-import { EditorState } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
 import { Extension } from "@codemirror/state";
 import { Panel } from "@codemirror/view";
 import { SyntaxNode } from "@lezer/common";
-import { TransactionSpec } from "@codemirror/state";
 import { ViewUpdate } from "@codemirror/view";
 import { showPanel } from "@codemirror/view";
 import { syntaxTree } from "@codemirror/language";
 import { tags as t } from "@lezer/highlight";
 import { Tag } from "@lezer/highlight";
+import { keymap } from "@codemirror/view";
 
 type PanelButtonOptions = {
   tag: string;
@@ -175,6 +174,16 @@ function hanleEditorUpdate(update: ViewUpdate) {
   }
 }
 export const formattingUpdateListener: Extension = EditorView.updateListener.of(hanleEditorUpdate);
+
+export const editorPanelKeymap = keymap.of([
+  { key: "Ctrl-Shift-b", run: (target: EditorView) => { makeBold(target); return true; } },
+  { key: "Ctrl-Shift-i", run: (target: EditorView) => { makeItalic(target); return true; } },
+  { key: "Ctrl-Shift-6", run: (target: EditorView) => { makeSuperscript(target); return true; } },
+  { key: "Ctrl-Shift--", run: (target: EditorView) => { makeSubscript(target); return true; } },
+  { key: "Ctrl-Shift-2", run: (target: EditorView) => { makeRef(target); return true; } },
+  { key: "Ctrl-Shift-4", run: (target: EditorView) => { makeSpaced(target); return true; } }
+]);
+
 export function operationsPanel() {
   return showPanel.of(editorPanel);
 }
