@@ -8,6 +8,7 @@ import { syntaxTree } from "@codemirror/language";
 import { tags as t } from "@lezer/highlight";
 import { Tag } from "@lezer/highlight";
 import { keymap } from "@codemirror/view";
+import { emacsStyleKeymap } from "@codemirror/commands";
 
 type PanelButtonOptions = {
   tag: string;
@@ -181,7 +182,8 @@ export const editorPanelKeymap = keymap.of([
   { key: "Ctrl-Shift-6", run: (target: EditorView) => { makeSuperscript(target); return true; } },
   { key: "Ctrl-Shift--", run: (target: EditorView) => { makeSubscript(target); return true; } },
   { key: "Ctrl-Shift-2", run: (target: EditorView) => { makeRef(target); return true; } },
-  { key: "Ctrl-Shift-4", run: (target: EditorView) => { makeSpaced(target); return true; } }
+  { key: "Ctrl-Shift-4", run: (target: EditorView) => { makeSpaced(target); return true; } },
+  ...emacsStyleKeymap
 ]);
 
 export function operationsPanel() {
