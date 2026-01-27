@@ -5,6 +5,8 @@ import { dictMarkdownSyntaxHighlighting } from "./lang-dictmarkdown";
 import { operationsPanel } from "./editor-panel";
 import { formattingUpdateListener } from "./editor-panel";
 import { editorPanelKeymap } from "./editor-panel";
+import { highlightActiveLine } from "@codemirror/view";
+import { highlightTrailingWhitespace } from "@codemirror/view";
 
 const targetElement: any = document.querySelector("#editor");
 export const editor = new EditorView({
@@ -16,7 +18,9 @@ export const editor = new EditorView({
     operationsPanel(),
     EditorView.lineWrapping,
     formattingUpdateListener,
-    editorPanelKeymap
+    editorPanelKeymap,
+    highlightActiveLine(),
+    highlightTrailingWhitespace()
   ],
   parent: targetElement
 });
