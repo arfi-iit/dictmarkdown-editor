@@ -5,9 +5,10 @@ export default {
   input: "src/index.ts",
   output: [
     {
-      file: "public/bundle.js",
+      file: "public/dictmarkdown-editor.js",
       format: "iife",
       sourcemap: true,
+      name: "DictmarkdownEditor",
     },
   ],
   plugins: [nodeResolve(), typescript()],
