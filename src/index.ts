@@ -8,35 +8,69 @@ import { editorPanelKeymap } from "./editor-panel";
 import { highlightActiveLine } from "@codemirror/view";
 import { highlightTrailingWhitespace } from "@codemirror/view";
 
-const targetElement: any = document.querySelector("#editor");
-export const editor = new EditorView({
-  extensions: [
-    minimalSetup,
-    dictMarkdownLanguage,
-    dictMarkdownSyntaxHighlighting,
-    history(),
-    operationsPanel(),
-    EditorView.lineWrapping,
-    formattingUpdateListener,
-    editorPanelKeymap,
-    highlightActiveLine(),
-    highlightTrailingWhitespace()
-  ],
-  parent: targetElement
-});
+export type DictmarkdownEditor = {
+  view: EditorView;
+  setText: (text: string) => void;
+  getText: () => string;
+  destroy: () => void;
+};
 
+export type DictmarkdownEditorOptions = {
+  initialText?: string;
+};
 
-export function setEditorText(text: string) {
-  const transaction = editor.state.update({
+function resolveEditorParent(parent: string | Element): Element {
+  if (typeof parent === "string") {
+    const parentElement = document.querySelector(parent);
+    if (!parentElement) {
+      throw new Error(`DictmarkdownEditor: parent element not found for selector "${parent}".`);
+    }
+    return parentElement;
+  }
+  return parent;
+}
+
+function getText(view: EditorView): string {
+  return view.state.doc.toString();
+}
+
+function setText(view: EditorView, text: string) {
+  const transaction = view.state.update({
     changes: {
       from: 0,
-      to: editor.state.doc.length,
+      to: view.state.doc.length,
       insert: text
     }
   });
-  editor.dispatch(transaction);
+  view.dispatch(transaction);
 };
 
-export function getEditorText() {
-  return editor.state.doc.toString();
+export function createDictmarkdownEditor(parent: string | Element, options: DictmarkdownEditorOptions = {}): DictmarkdownEditor {
+  const parentElem = resolveEditorParent(parent);
+  const view = new EditorView({
+    extensions: [
+      minimalSetup,
+      dictMarkdownLanguage,
+      dictMarkdownSyntaxHighlighting,
+      history(),
+      operationsPanel(),
+      EditorView.lineWrapping,
+      formattingUpdateListener,
+      editorPanelKeymap,
+      highlightActiveLine(),
+      highlightTrailingWhitespace()
+    ],
+    parent: parentElem
+  });
+
+  if (options.initialText != null) {
+    setText(view, options.initialText);
+  }
+
+  return {
+    view,
+    setText: (text) => setText(view, text),
+    getText: () => getText(view),
+    destroy: () => view.destroy()
+  }
 }
