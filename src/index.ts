@@ -2,11 +2,12 @@ import { minimalSetup, EditorView } from "codemirror";
 import { history } from "@codemirror/commands";
 import { dictMarkdownLanguage } from "./lang-dictmarkdown";
 import { dictMarkdownSyntaxHighlighting } from "./lang-dictmarkdown";
-import { operationsPanel } from "./editor-panel";
+import { emptyPanel, operationsPanel } from "./editor-panel";
 import { formattingUpdateListener } from "./editor-panel";
 import { editorPanelKeymap } from "./editor-panel";
 import { highlightActiveLine } from "@codemirror/view";
 import { highlightTrailingWhitespace } from "@codemirror/view";
+import { MergeView } from "@codemirror/merge";
 
 export type DictmarkdownEditor = {
   view: EditorView;
@@ -15,9 +16,23 @@ export type DictmarkdownEditor = {
   destroy: () => void;
 };
 
+
 export type DictmarkdownEditorOptions = {
   initialText?: string;
 };
+
+export type DictmarkdownMergeEditor = {
+  view: MergeView;
+  setText: (text: string) => void;
+  getText: () => string;
+  destroy: () => void;
+};
+
+export type DictmarkdownMergeEditorOptions = {
+  initialText?: string;
+  readonlyText: string;
+};
+
 
 function resolveEditorParent(parent: string | Element): Element {
   if (typeof parent === "string") {
@@ -71,6 +86,47 @@ export function createDictmarkdownEditor(parent: string | Element, options: Dict
     view,
     setText: (text) => setText(view, text),
     getText: () => getText(view),
+    destroy: () => view.destroy()
+  }
+}
+
+export function createDictmarkdownMergeEditor(parent: string | Element, options: DictmarkdownMergeEditorOptions): DictmarkdownMergeEditor {
+  const parentElem = resolveEditorParent(parent);
+  const view = new MergeView({
+    a: {
+      doc: options.readonlyText,
+      extensions: [
+        minimalSetup,
+        dictMarkdownLanguage,
+        dictMarkdownSyntaxHighlighting,
+        emptyPanel(),
+        EditorView.lineWrapping,
+        highlightActiveLine(),
+        highlightTrailingWhitespace(),
+        EditorView.editable.of(false)
+      ]
+    },
+    b: {
+      doc: options.initialText ?? "",
+      extensions: [
+        minimalSetup,
+        dictMarkdownLanguage,
+        dictMarkdownSyntaxHighlighting,
+        history(),
+        operationsPanel(),
+        EditorView.lineWrapping,
+        formattingUpdateListener,
+        editorPanelKeymap,
+        highlightActiveLine(),
+        highlightTrailingWhitespace()
+      ]
+    },
+    parent: parentElem
+  });
+  return {
+    view,
+    setText: (text) => setText(view.b, text),
+    getText: () => getText(view.b),
     destroy: () => view.destroy()
   }
 }

@@ -44,6 +44,8 @@ class CssClasses {
   static readonly PanelButton: string = "dictmarkdown-panel-button";
   static readonly FormatButton: string = "dictmarkdown-formatt-button";
   static readonly ActiveButton: string = "dictmarkdown-button-active";
+  static readonly EditorPanel: string = "dictmarkdown-editor-panel";
+  static readonly EmptyPanel: string = "dictmarkdown-empty-panel";
 }
 
 function getSyntaxNodeAtCursor(view: EditorView): SyntaxNode | null {
@@ -116,6 +118,7 @@ const makeRef = (view: EditorView): void => toggleAnnotation(view, AnnotationTyp
 
 function editorPanel(view: EditorView): Panel {
   let dom = document.createElement("div");
+  dom.classList.add(CssClasses.EditorPanel);
 
   dom.appendChild(createPanelButton({
     iconClassName: "fa fa-bold",
@@ -174,6 +177,7 @@ function hanleEditorUpdate(update: ViewUpdate) {
     }
   }
 }
+
 export const formattingUpdateListener: Extension = EditorView.updateListener.of(hanleEditorUpdate);
 
 export const editorPanelKeymap = keymap.of([
@@ -188,4 +192,15 @@ export const editorPanelKeymap = keymap.of([
 
 export function operationsPanel() {
   return showPanel.of(editorPanel);
+}
+
+export function emptyPanel() {
+  return showPanel.of((view: EditorView) => {
+    let dom = document.createElement("div");
+    dom.classList.add(CssClasses.EmptyPanel);
+    return {
+      dom,
+      top: true
+    }
+  })
 }
