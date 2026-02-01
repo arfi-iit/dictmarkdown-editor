@@ -11,8 +11,8 @@
     "dev": "npm-run-all --parallel start watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Petru Rebeja",
+  "license": "MIT",
   "dependencies": {
     "@arfi-iit/lezer-dictmarkdown": "^1.1.0",
     "@codemirror/autocomplete": "^6.18.6",
