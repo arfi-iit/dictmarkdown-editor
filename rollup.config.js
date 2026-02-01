@@ -7,7 +7,7 @@ export default [
   {
     input: "src/index.ts",
     output: {
-      file: "public/dictmarkdown-editor.iffe.js",
+      file: "public/dictmarkdown-editor.iife.js",
       format: "iife",
       sourcemap: true,
       name: "DictmarkdownEditor",
