@@ -5,17 +5,19 @@ import { dictMarkdownSyntaxHighlighting } from "./lang-dictmarkdown";
 import { emptyPanel, operationsPanel } from "./editor-panel";
 import { formattingUpdateListener } from "./editor-panel";
 import { editorPanelKeymap } from "./editor-panel";
-import { highlightActiveLine } from "@codemirror/view";
+import { highlightActiveLine, ViewUpdate } from "@codemirror/view";
 import { highlightTrailingWhitespace } from "@codemirror/view";
 import { MergeView } from "@codemirror/merge";
 
+export type OnTextChangeCallback =(text: string)=>void;
+
 export type DictmarkdownEditor = {
   view: EditorView;
+  onTextChange: (callback: OnTextChangeCallback) => void;
   setText: (text: string) => void;
   getText: () => string;
   destroy: () => void;
 };
-
 
 export type DictmarkdownEditorOptions = {
   initialText?: string;
@@ -23,6 +25,7 @@ export type DictmarkdownEditorOptions = {
 
 export type DictmarkdownMergeEditor = {
   view: MergeView;
+  onTextChange: (callback: OnTextChangeCallback) => void;
   setText: (text: string) => void;
   getText: () => string;
   destroy: () => void;
@@ -62,6 +65,8 @@ function setText(view: EditorView, text: string) {
 
 export function createDictmarkdownEditor(parent: string | Element, options: DictmarkdownEditorOptions = {}): DictmarkdownEditor {
   const parentElem = resolveEditorParent(parent);
+  let textChangeCallbacks: Array<(text: string) => void> = [];
+
   const view = new EditorView({
     extensions: [
       minimalSetup,
@@ -73,7 +78,13 @@ export function createDictmarkdownEditor(parent: string | Element, options: Dict
       formattingUpdateListener,
       editorPanelKeymap,
       highlightActiveLine(),
-      highlightTrailingWhitespace()
+      highlightTrailingWhitespace(),
+      EditorView.updateListener.of((update: ViewUpdate) => {
+        if (update.docChanged) {
+          const text = getText(update.view);
+          textChangeCallbacks.forEach(callback => callback(text));
+        }
+      })
     ],
     parent: parentElem
   });
@@ -84,6 +95,9 @@ export function createDictmarkdownEditor(parent: string | Element, options: Dict
 
   return {
     view,
+    onTextChange: (callback: (text: string) => void) => {
+      textChangeCallbacks.push(callback);
+    },
     setText: (text) => setText(view, text),
     getText: () => getText(view),
     destroy: () => view.destroy()
@@ -92,6 +106,8 @@ export function createDictmarkdownEditor(parent: string | Element, options: Dict
 
 export function createDictmarkdownMergeEditor(parent: string | Element, options: DictmarkdownMergeEditorOptions): DictmarkdownMergeEditor {
   const parentElem = resolveEditorParent(parent);
+  let textChangeCallbacks: Array<(text: string) => void> = [];
+
   const view = new MergeView({
     a: {
       doc: options.readonlyText,
@@ -118,13 +134,22 @@ export function createDictmarkdownMergeEditor(parent: string | Element, options:
         formattingUpdateListener,
         editorPanelKeymap,
         highlightActiveLine(),
-        highlightTrailingWhitespace()
+        highlightTrailingWhitespace(),
+        EditorView.updateListener.of((update: ViewUpdate) => {
+          if (update.docChanged) {
+            const text = getText(update.view);
+            textChangeCallbacks.forEach(callback => callback(text));
+          }
+        })
       ]
     },
     parent: parentElem
   });
   return {
     view,
+    onTextChange: (callback: (text: string) => void) => {
+      textChangeCallbacks.push(callback);
+    },
     setText: (text) => setText(view.b, text),
     getText: () => getText(view.b),
     destroy: () => view.destroy()
